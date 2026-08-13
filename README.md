@@ -1,14 +1,12 @@
-# LinkLite — URL Shortener
+# LinkLite — Full-Stack URL Shortener
 
-A simple full-stack URL shortener built for the Round 1 assignment.
+A simple, fast, and persistent full-stack URL shortener built for the Round 1 assignment.
 
-## Live Demo
+## Live Submission Links
 
-`https://url-shortener-assignment-self.vercel.app/`
-
-## GitHub
-
-`https://github.com/iam-abhay/url-shortener-assignment`
+- **Live Demo (Frontend)**: [https://url-shortener-assignment-self.vercel.app/](https://url-shortener-assignment-self.vercel.app/)
+- **Live Backend API**: [https://linklite-api-ekdk.onrender.com](https://linklite-api-ekdk.onrender.com)
+- **Public GitHub Repository**: [https://github.com/iam-abhay/url-shortener-assignment](https://github.com/iam-abhay/url-shortener-assignment)
 
 ## Screenshot
 
@@ -16,24 +14,18 @@ A simple full-stack URL shortener built for the Round 1 assignment.
 
 ## Features
 
-- Paste a long URL and create a short link.
-- Redirect from the short link to the original URL.
-- Increment click count on every redirect.
-- List all shortened URLs and click counts.
-- PostgreSQL persistence.
-- React frontend.
-- Express REST API.
-- Input validation and clear error states.
-- Responsive UI.
-- Docker Compose for one-command local PostgreSQL.
+- **Shorten Long URLs**: Paste any HTTP or HTTPS URL to generate an 8-character cryptographically secure short code.
+- **Smart Protocol Fix**: Automatically prepends `https://` if omitted (e.g. `github.com` -> `https://github.com`).
+- **Atomic Click Tracking**: Redirecting via `/:shortCode` increments the click count atomically using single-query SQL updates to prevent race conditions.
+- **Persistence**: Powered by PostgreSQL database on Render, with seamless zero-config SQLite fallback for offline local development.
+- **Modern UI**: Styled with modern typography (*Space Grotesk* and *DM Sans*), dark mode hero header, live stats counters, and copy-to-clipboard feedback.
 
 ## Tech Stack
 
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Database: PostgreSQL
-- Driver: `pg`
-- Deployment: Vercel/Netlify + Render/Railway
+- **Frontend**: React 19 + Vite
+- **Backend**: Node.js + Express 5
+- **Database**: PostgreSQL (Driver: `pg`), SQLite fallback (`better-sqlite3`)
+- **Deployment**: Vercel (Frontend) + Render (Backend Web Service & PostgreSQL)
 
 ## Project Structure
 
@@ -41,37 +33,31 @@ A simple full-stack URL shortener built for the Round 1 assignment.
 url-shortener/
 ├── backend/
 │   ├── src/
-│   │   ├── server.js
-│   │   └── db.js
+│   │   ├── server.js    # Express REST API routes & app configuration
+│   │   └── db.js        # Dual-mode database interface (PostgreSQL / SQLite)
 │   ├── package.json
 │   ├── Dockerfile
 │   └── .env.example
 ├── frontend/
 │   ├── src/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
+│   │   ├── App.jsx      # Main React UI component
+│   │   ├── main.jsx     # React DOM entry point
+│   │   └── index.css    # Custom CSS design system
 │   ├── package.json
 │   ├── vite.config.js
+│   ├── vercel.json      # Client-side SPA routing config
 │   └── .env.example
 ├── docs/
 │   └── screenshot.svg
 ├── docker-compose.yml
 ├── render.yaml
-├── vercel.json
 ├── .gitignore
 └── README.md
 ```
 
-## Prerequisites
+## Quick Start (Local Development)
 
-- Node.js 18+
-- npm
-- Docker Desktop, or local PostgreSQL instance (Optional: SQLite fallback automatically works out of the box for local dev!)
-
-## Quick Start
-
-### Backend
+### 1. Backend
 
 ```bash
 cd backend
@@ -81,7 +67,9 @@ npm run dev
 
 The backend runs on `http://localhost:5000`.
 
-### Frontend
+*(Note: If no PostgreSQL `DATABASE_URL` is set locally, the backend automatically uses an offline SQLite database stored in `backend/links.db`.)*
+
+### 2. Frontend
 
 Open another terminal:
 
@@ -93,9 +81,11 @@ npm run dev
 
 The frontend runs on `http://localhost:5173`.
 
+---
+
 ## Environment Variables
 
-### Backend
+### Backend (`backend/.env`)
 
 ```env
 PORT=5000
@@ -104,11 +94,13 @@ BASE_URL=http://localhost:5000
 FRONTEND_URL=http://localhost:5173
 ```
 
-### Frontend
+### Frontend (`frontend/.env`)
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
+
+---
 
 ## API Reference
 
@@ -119,7 +111,20 @@ POST /api/links
 Content-Type: application/json
 
 {
-  "url": "https://example.com/some/very/long/path"
+  "url": "https://github.com/iam-abhay/url-shortener-assignment"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "id": 1,
+  "originalUrl": "https://github.com/iam-abhay/url-shortener-assignment",
+  "shortCode": "avuftRF1",
+  "shortUrl": "https://linklite-api-ekdk.onrender.com/avuftRF1",
+  "clicks": 0,
+  "createdAt": "2026-08-13T16:56:01.701Z"
 }
 ```
 
@@ -129,17 +134,47 @@ Content-Type: application/json
 GET /api/links
 ```
 
+**Response (200 OK):**
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "originalUrl": "https://github.com/iam-abhay/url-shortener-assignment",
+      "shortCode": "avuftRF1",
+      "shortUrl": "https://linklite-api-ekdk.onrender.com/avuftRF1",
+      "clicks": 1,
+      "createdAt": "2026-08-13T16:56:01.701Z"
+    }
+  ]
+}
+```
+
 ### 3. Redirect & Increment Clicks
 
 ```http
 GET /:shortCode
 ```
 
+**Response:** `302 Found` redirecting to `originalUrl`.
+
 ### 4. Health Check
 
 ```http
 GET /api/health
 ```
+
+**Response (200 OK):**
+
+```json
+{
+  "status": "ok",
+  "database": "pg"
+}
+```
+
+---
 
 ## Database Schema
 
@@ -153,26 +188,18 @@ CREATE TABLE IF NOT EXISTS links (
 );
 ```
 
-## Deployment Guide
+---
 
-### Backend + PostgreSQL on Render
+## Submission Checklist
 
-1. Push this repository to GitHub.
-2. Create a PostgreSQL database on Render.
-3. Create a Web Service from the repository with Root Directory `backend`.
-4. Build command: `npm install`
-5. Start command: `npm start`
-6. Add environment variables:
-   - `DATABASE_URL` (From Render Postgres)
-   - `BASE_URL` (`https://<your-render-backend>.onrender.com`)
-   - `FRONTEND_URL` (`https://<your-vercel-frontend>.vercel.app`)
-
-### Frontend on Vercel
-
-1. Import the GitHub repository on Vercel.
-2. Set Root Directory to `frontend`.
-3. Set Environment Variable: `VITE_API_URL` = `https://<your-render-backend>.onrender.com/api`
-4. Deploy.
+- [x] Public GitHub repository with README setup steps
+- [x] Live Demo URL (Frontend deployed on Vercel)
+- [x] Live Backend API (Express deployed on Render)
+- [x] Live PostgreSQL database hosted on Render
+- [x] Short URL creation & input validation
+- [x] Atomic click counter incrementing on redirect
+- [x] Persistent storage after page refresh
+- [x] Responsive React frontend UI with copy button
 
 ---
 
@@ -209,4 +236,3 @@ Key parameters (`DATABASE_URL`, `BASE_URL`, `FRONTEND_URL`, `VITE_API_URL`) are 
 - **Rate Limiting:** Protect APIs with `express-rate-limit` per IP.
 - **Safety Scanning:** Check submitted URLs against Google Safe Browsing API / VirusTotal API prior to database insertion.
 - **SSRF Prevention:** Disallow private IP addresses and localhost destinations.
-

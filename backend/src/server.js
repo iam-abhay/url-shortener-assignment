@@ -14,7 +14,6 @@ import {
 
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
-const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 
 app.disable("x-powered-by");
 app.use(
@@ -25,6 +24,15 @@ app.use(
   })
 );
 app.use(express.json());
+
+function getBaseUrl(req) {
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL.replace(/\/$/, "");
+  }
+  const host = req.get("host");
+  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
+  return `${protocol}://${host}`;
+}
 
 function isValidHttpUrl(value) {
   try {
@@ -88,7 +96,7 @@ app.post("/api/links", async (req, res, next) => {
       id: link.id,
       originalUrl: link.originalUrl,
       shortCode: link.shortCode,
-      shortUrl: `${BASE_URL}/${link.shortCode}`,
+      shortUrl: `${getBaseUrl(req)}/${link.shortCode}`,
       clicks: link.clicks,
       createdAt: link.createdAt
     });
@@ -97,7 +105,7 @@ app.post("/api/links", async (req, res, next) => {
   }
 });
 
-app.get("/api/links", async (_req, res, next) => {
+app.get("/api/links", async (req, res, next) => {
   try {
     const links = await getAllLinks();
 
@@ -106,7 +114,7 @@ app.get("/api/links", async (_req, res, next) => {
         id: link.id,
         originalUrl: link.originalUrl,
         shortCode: link.shortCode,
-        shortUrl: `${BASE_URL}/${link.shortCode}`,
+        shortUrl: `${getBaseUrl(req)}/${link.shortCode}`,
         clicks: link.clicks,
         createdAt: link.createdAt
       }))

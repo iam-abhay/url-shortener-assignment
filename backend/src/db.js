@@ -1,5 +1,4 @@
 import pg from "pg";
-import Database from "better-sqlite3";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,7 +17,7 @@ export async function initDatabase() {
       pool = new Pool({
         connectionString,
         ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
-        connectionTimeoutMillis: 3000
+        connectionTimeoutMillis: 5000
       });
 
       await pool.query("SELECT 1");
@@ -42,6 +41,7 @@ export async function initDatabase() {
 
   dbMode = "sqlite";
   const dbPath = path.join(__dirname, "../links.db");
+  const { default: Database } = await import("better-sqlite3");
   sqliteDb = new Database(dbPath);
   sqliteDb.exec(`
     CREATE TABLE IF NOT EXISTS links (

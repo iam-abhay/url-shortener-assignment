@@ -14,12 +14,7 @@ import {
 
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
-const BASE_URL = (
-  process.env.BASE_URL ||
-  (process.env.NODE_ENV === "production"
-    ? "https://url-shortener-assignment-iywi.onrender.com"
-    : `http://localhost:${PORT}`)
-).replace(/\/$/, "");
+const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 
 app.disable("x-powered-by");
 app.use(

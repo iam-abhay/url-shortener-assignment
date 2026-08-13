@@ -10,11 +10,7 @@ let pool = null;
 let sqliteDb = null;
 
 export async function initDatabase() {
-  const connectionString =
-    process.env.DATABASE_URL ||
-    (process.env.NODE_ENV === "production"
-      ? "postgresql://linklite_db_lmmm_user:2dBEyoMbvpWvZeAwOiI5YRyoLX9nUxXt@dpg-d9uuu2favr4c73bjs38g-a.virginia-postgres.render.com/linklite_db_lmmm"
-      : null);
+  const connectionString = process.env.DATABASE_URL;
 
   if (connectionString && !connectionString.startsWith("sqlite:")) {
     try {

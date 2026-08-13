@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:5000/api" : "https://url-shortener-assignment-iywi.onrender.com/api");
 
 export default function App() {
   const [url, setUrl] = useState("");

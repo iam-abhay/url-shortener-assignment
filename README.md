@@ -4,9 +4,7 @@ A simple full-stack URL shortener built for the Round 1 assignment.
 
 ## Live Demo
 
-> **Add your deployed URL here before submitting.**
-
-`https://YOUR-FRONTEND.vercel.app`
+`https://url-shortener-assignment-red.vercel.app`
 
 ## GitHub
 

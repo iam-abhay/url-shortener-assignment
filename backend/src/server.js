@@ -15,6 +15,7 @@ import {
 const app = express();
 const PORT = Number(process.env.PORT || 5000);
 
+app.set("trust proxy", true);
 app.disable("x-powered-by");
 app.use(
   cors({
@@ -29,8 +30,8 @@ function getBaseUrl(req) {
   if (process.env.BASE_URL) {
     return process.env.BASE_URL.replace(/\/$/, "");
   }
-  const host = req.get("host");
-  const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
+  const host = req.get("x-forwarded-host") || req.get("host");
+  const protocol = req.get("x-forwarded-proto") || req.protocol || "https";
   return `${protocol}://${host}`;
 }
 

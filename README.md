@@ -10,7 +10,7 @@ A simple full-stack URL shortener built for the Round 1 assignment.
 
 ## GitHub
 
-`https://github.com/YOUR_USERNAME/url-shortener`
+`https://github.com/iam-abhay/url-shortener-assignment`
 
 ## Screenshot
 
